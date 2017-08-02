@@ -1,6 +1,6 @@
 # aurelia-orbit-poc
 
-This is a quick and dirty proof of concept for using OrbitJS in an AureliaJS app as a data layer for requesting/ managing JSON API data.
+This is a quick and dirty proof of concept for using [OrbitJS](orbitjs.com) in an [AureliaJS](aurelia.io) app as a data layer for requesting/ managing JSON API data.
 
 ## Get it running
 
@@ -32,5 +32,10 @@ const client = new HttpClient();
 Orbit.fetch = client.fetch;
 ```
 + Remember to delete the `IndexedDB` databases as you make changes to the code.
+
+## Special Thanks
+
++ Thanks to [Rob Eisenberg](https://github.com/EisenbergEffect) and friends for building AureliaJS!
++ Thanks to [Dan Gebhardt](https://github.com/dgeb) and friends for buidling OrbitJS!
 
 Hope this helps someone :)
