@@ -3,25 +3,26 @@ import Orbit from '@orbit/core';
 import Store from '@orbit/store';
 import IndexedDBSource from '@orbit/indexeddb';
 import JSONAPISource from '@orbit/jsonapi';
-import Coordinator, { RequestStrategy, SyncStrategy } from '@orbit/coordinator';
 
 import bucket from 'orbit/buckets';
 import schema from 'orbit/schema';
+import AppCoordinator, { remotePullRequest, remotePushRequest, remoteStoreSync, backupStoreSync } from 'orbit/coordinators';
 
+
+// polyfill fetch client conditionally
+const fetchPolyfill = !self.fetch
+  ? System.import('isomorphic-fetch' /* webpackChunkName: 'fetch' */)
+  : Promise.resolve(self.fetch);
 
 export default class DS {
   constructor() {
-    const client = new HttpClient();
-
-    // Use http-fetch-client.
-    Orbit.fetch = client.fetch;
+    this.configureOrbit();
 
     // Memory store.
-    this.store = new Store({ bucket, schema });
+    this.store = new Store({ schema });
 
     // Indexed DB store.
     this.backup = new IndexedDBSource({
-      bucket,
       schema,
       name: 'backup',
       namespace: 'apiary',
@@ -33,50 +34,28 @@ export default class DS {
       host: 'http://private-479d1-jsonapi11.apiary-mock.com',
     });
 
-    // Coordinator
-    this.coordinator = new Coordinator({
-      sources: [this.store, this.backup, this.remote]
-    });
-
-    // Backup sync strategy
-    const backupStoreSync = new SyncStrategy({
-      source: 'store',
-      target: 'backup',
-
-      blocking: true
-    });
-
-    // Query the remote server whenever the store is queried
-    this.coordinator.addStrategy(new RequestStrategy({
-      source: 'store',
-      on: 'beforeQuery',
-
-      target: 'remote',
-      action: 'pull',
-
-      blocking: true
-    }));
-
-    // Update the remote server whenever the store is updated
-    this.coordinator.addStrategy(new RequestStrategy({
-      source: 'store',
-      on: 'beforeUpdate',
-
-      target: 'remote',
-      action: 'push',
-
-      blocking: true
-    }));
-
-    // Sync all changes received from the remote server to the store
-    this.coordinator.addStrategy(new SyncStrategy({
-      source: 'remote',
-      target: 'store',
-
-      blocking: false
-    }));
-
-    this.coordinator.addStrategy(backupStoreSync);
+    this.coordinator = this.configureCoordinator(AppCoordinator);
     this.coordinator.activate();
+  }
+
+  async configureOrbit() {
+    await fetchPolyfill;
+    const client = new HttpClient();
+
+    // Use http-fetch-client.
+    Orbit.fetch = client.fetch;
+  }
+
+  configureCoordinator(coordinator) {
+    coordinator.addSource(this.store);
+    coordinator.addSource(this.backup);
+    coordinator.addSource(this.remote);
+
+    coordinator.addStrategy(remotePullRequest);
+    coordinator.addStrategy(remotePushRequest);
+    coordinator.addStrategy(remoteStoreSync);
+    coordinator.addStrategy(backupStoreSync);
+
+    return coordinator;
   }
 }

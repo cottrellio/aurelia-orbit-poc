@@ -1,17 +1,28 @@
-import { inject } from 'aurelia-framework';
+import { computedFrom, inject } from 'aurelia-framework';
 import DS from 'services/store';
 
 @inject(DS)
 export class Articles {
   constructor(ds) {
     this.ds = ds;
-  }
-
-  getArticles() {
-    return this.ds.store.query(q => q.findRecords('article'));
+    this.modelName = 'article';
+    this.model = [];
   }
 
   async activate() {
-    this.articles = await this.getArticles();
+    const model = await this.getModel();
+
+    console.log(model);
+    this.model = model;
+  }
+
+  getModel() {
+    this.isLoadingModel = true;
+
+    return this.ds.store.query(q => q.findRecords(this.modelName)).then((records) => {
+      this.isLoadingModel = false;
+
+      return records;
+    });
   }
 }

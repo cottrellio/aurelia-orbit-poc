@@ -6,14 +6,14 @@ export class App {
   constructor(ds) {
     this.ds = ds;
 
-    ds.store.query(q => q.findRecords('article'))
-      .then(articles => {
-        console.log('[REMOTE]', articles);
-        console.log('[CACHE]', ds.store.cache.query(q => q.findRecords('article')));
-      })
-      .catch(e => {
-        console.error(e);
-      });
+    // ds.store.query(q => q.findRecords('article'))
+    //   .then(articles => {
+    //     console.log('[REMOTE]', articles);
+    //     console.log('[CACHE]', ds.store.cache.query(q => q.findRecords('article')));
+    //   })
+    //   .catch(e => {
+    //     console.error(e);
+    //   });
   }
 
   configureRouter(config, router) {
