@@ -1,0 +1,14 @@
+<template>
+  <section class="au-animate">
+    <h2>Articles</h2>
+    <div class="row au-stagger">
+      <div class="col-sm-6 col-md-3 card-container au-animate" repeat.for="article of articles">
+        <div class="card">
+          <div class="content">
+            <p class="name">${article.attributes.title}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</template>
