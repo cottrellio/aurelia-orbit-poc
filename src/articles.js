@@ -10,19 +10,12 @@ export class Articles {
   }
 
   async activate() {
-    const model = await this.getModel();
-
-    console.log(model);
-    this.model = model;
+    this.model = await this.getModel();
   }
 
   getModel() {
-    this.isLoadingModel = true;
-
-    return this.ds.store.query(q => q.findRecords(this.modelName)).then((records) => {
-      this.isLoadingModel = false;
-
-      return records;
-    });
+    return this.ds.store.query(q => q.findRecords(this.modelName))
+      .then()
+      .catch(e => console.error('[YOMAMA]', e));
   }
 }
